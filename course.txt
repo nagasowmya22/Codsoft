@@ -1,0 +1,179 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class Course {
+    private String code;
+    private String title;
+    private String description;
+    private int capacity;
+    private List<String> registeredStudents;
+    private String schedule;
+
+    public Course(String code, String title, String description, int capacity, String schedule) {
+        this.code = code;
+        this.title = title;
+        this.description = description;
+        this.capacity = capacity;
+        this.schedule = schedule;
+        this.registeredStudents = new ArrayList<>();
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public List<String> getRegisteredStudents() {
+        return registeredStudents;
+    }
+
+    public String getSchedule() {
+        return schedule;
+    }
+
+    public void registerStudent(String studentName) {
+        registeredStudents.add(studentName);
+    }
+
+    public void removeStudent(String studentName) {
+        registeredStudents.remove(studentName);
+    }
+}
+
+class Student {
+    private String studentId;
+    private String name;
+    private List<String> registeredCourses;
+
+    public Student(String studentId, String name) {
+        this.studentId = studentId;
+        this.name = name;
+        this.registeredCourses = new ArrayList<>();
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<String> getRegisteredCourses() {
+        return registeredCourses;
+    }
+
+    public void registerCourse(String courseCode) {
+        registeredCourses.add(courseCode);
+    }
+
+    public void dropCourse(String courseCode) {
+        registeredCourses.remove(courseCode);
+    }
+}
+
+public class CourseRegistrationSystem {
+    public static void main(String[] args) {
+        List<Course> courses = new ArrayList<>();
+        courses.add(new Course("CS101", "Introduction to Programming", "Learn basic programming concepts", 30, "Mon/Wed 10:00 AM"));
+        courses.add(new Course("ENG201", "English Composition", "Improve writing skills", 25, "Tue/Thu 2:00 PM"));
+        courses.add(new Course("MATH301", "Calculus I", "Study calculus basics", 40, "Mon/Fri 1:00 PM"));
+
+        List<Student> students = new ArrayList<>();
+        students.add(new Student("1001", "Alice"));
+        students.add(new Student("1002", "Bob"));
+        students.add(new Student("1003", "Claire"));
+
+        displayAvailableCourses(courses);
+
+        Scanner scanner = new Scanner(System.in);
+        boolean running = true;
+        while (running) {
+            System.out.print("Enter student ID to register/drop courses (or 'q' to quit): ");
+            String studentId = scanner.nextLine();
+
+            if (studentId.equalsIgnoreCase("q")) {
+                running = false;
+            } else {
+                Student student = findStudentById(students, studentId);
+                if (student != null) {
+                    displayAvailableCourses(courses);
+                    System.out.print("Enter course code to register/drop (or 'q' to exit): ");
+                    String courseCode = scanner.nextLine();
+                    Course selectedCourse = findCourseByCode(courses, courseCode);
+
+                    if (selectedCourse != null) {
+                        if (student.getRegisteredCourses().contains(courseCode)) {
+                            dropCourseForStudent(student, selectedCourse);
+                        } else {
+                            registerStudentForCourse(student, selectedCourse);
+                        }
+                    } else {
+                        System.out.printlnCourse not found.");
+                    }
+                } else {
+                    System.out.println("Student not found.");
+                }
+            }
+        }
+
+        System.out.println("Thank you for using the Course Registration System!");
+        scanner.close();
+    }
+
+    private static void displayAvailableCourses(List<Course> courses) {
+        System.out.println("Available Courses:");
+        for (Course course : courses) {
+            System.out.println(course.getCode() + " - " + course.getTitle() + " (" + course.getDescription() + ")");
+            System.out.println("Capacity: " + course.getRegisteredStudents().size() + "/" + course.getCapacity());
+            System.out.println("Schedule: " + course.getSchedule());
+            System.out.println();
+        }
+    }
+
+    private static Course findCourseByCode(List<Course> courses, String code) {
+        for (Course course : courses) {
+            if (course.getCode().equalsIgnoreCase(code)) {
+                return course;
+            }
+        }
+        return null;
+    }
+
+    private static Student findStudentById(List<Student> students, String studentId) {
+        for (Student student : students) {
+            if (student.getStudentId().equalsIgnoreCase(studentId)) {
+                return student;
+            }
+        }
+        return null;
+    }
+
+    private static void registerStudentForCourse(Student student, Course course) {
+        if (course.getRegisteredStudents().size() < course.getCapacity()) {
+            course.registerStudent(student.getName());
+            student.registerCourse(course.getCode());
+            System.out.println(student.getName() + " registered for course " + course.getCode());
+        } else {
+            System.out.println("Course " + course.getCode() + " is full. Cannot register " + student.getName());
+        }
+    }
+
+    private static void dropCourseForStudent(Student student, Course course) {
+        course.removeStudent(student.getName());
+        student.dropCourse(course.getCode());
+        System.out.println(student.getName() + " dropped course " + course.getCode());
+    }
+}
